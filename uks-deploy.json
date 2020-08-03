@@ -193,7 +193,7 @@
         "lbId": "[resourceId('Microsoft.Network/loadBalancers/', 'LB-External')]",
         "subnetmgmtRef": "[concat(variables('vnetID'),'/subnets/', parameters('managementSubnetName'))]",
         "subnettrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('trustSubnetName'))]",
-        "subnetuntrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('untrustSubnetName'))]",
+        "subnetuntrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('untrustSubnetName'))]"
     },
     "resources": [
         {
