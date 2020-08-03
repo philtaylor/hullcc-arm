@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "value": "vnet-nhss-hub-ukw-prd-01"
+    },
+    "addressPrefix": {
+      "value": [
+        "10.243.193.0/24"
+      ]
+    },
+    "gatewaySubnetAddressPrefix": {
+      "value": "10.243.193.64/26"
+    },
+    "bastionSubnetAddressPrefix": {
+      "value": "10.243.193.224/27"
+    },
+    "subnets": {
+      "value": [
+        {
+          "name": "sn-vnet-nhss-hub-ukw-prd-mgt-01",
+          "addressPrefix": "10.243.193.0/26",
+          "securityRules": [],
+          "routes": [
+                    {
+                        "name": "Default-NVA",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.243.192.196"
+                        }
+                    },
+                    {
+                        "name": "Within-VNet",
+                        "properties": {
+                            "addressPrefix": "10.243.193.0/26",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+        },
+        {
+          "name": "sn-vnet-nhss-hub-ukw-prd-jumpbox-01",
+          "addressPrefix": "10.243.193.144/28",
+          "securityRules": [],
+          "routes": [
+                    {
+                        "name": "Default-NVA",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.243.192.196"
+                        }
+                    },
+                    {
+                        "name": "Within-VNet",
+                        "properties": {
+                            "addressPrefix": "10.243.193.144/28",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+        },
+        {
+          "name": "sn-vnet-nhss-hub-ukw-prd-nva-fe-01",
+          "addressPrefix": "10.243.193.160/27",
+          "securityRules": []
+        },
+        {
+          "name": "sn-vnet-nhss-hub-ukw-prd-nva-be-01",
+          "addressPrefix": "10.243.193.192/27",
+          "securityRules": []
+        }
+          ]
+        }
+    }
+  }

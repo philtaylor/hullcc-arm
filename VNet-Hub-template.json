@@ -1,0 +1,169 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      }
+    },
+    "addressPrefix": {
+      "type": "array",
+      "minLength": 1,
+      "metadata": {
+        "description": "One or more CIDR ranges for the virtual network"
+      }
+    },
+"locationInitials": {
+      "type": "string",
+      "metadata": {
+        "description": "Location where the VNet will be provisioned"
+      }
+    },
+    "gatewaySubnetAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Address space for GatewaySubnet"
+      }
+    },
+    "routes-GatewaySubnet": {
+      "type": "array",
+      "metadata": {
+        "description": "Route table for GatewaySubnet"
+      }
+    },
+    "bastionSubnetAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Address space for AzureBastionSubnet"
+      }
+    },
+    "securityRules-AzureBastionSubnet": {
+      "type": "array",
+      "metadata": {
+        "description": "Network Secuirty Group for AzureBastionSubnet"
+      }
+    },
+    "subnets": {
+      "type": "array",
+      "metadata": {
+        "description": "An array of subnets to use"
+      }
+    }
+  },
+  "variables": {
+    "gatewaySubnet": [
+      {
+        "name": "GatewaySubnet",
+        "properties": {
+          "addressPrefix": "[parameters('gatewaySubnetAddressPrefix')]",
+          "routeTable": {
+            "id": "[resourceId('Microsoft.Network/routeTables', concat('route-GatewaySubnet-', parameters('locationInitials')))]"
+          }
+        }
+      }
+    ],
+    "bastionSubnet": [
+      {
+        "name": "AzureBastionSubnet",
+        "properties": {
+          "addressPrefix": "[parameters('bastionSubnetAddressPrefix')]",
+          "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat('nsg-AzureBastionSubnet-', parameters('locationInitials')))]"
+          }
+        }
+      }
+    ],
+    "definedSubnets": {
+      "copy": [
+        {
+          "name": "subnets",
+          "count": "[length(parameters('subnets'))]",
+          "input": {
+            "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+            "properties": {
+              "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat('nsg-', parameters('subnets')[copyIndex('subnets')].name))]"
+              },
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', concat('route-', parameters('subnets')[copyIndex('subnets')].name))]"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "allSubnets": "[union(variables('gatewaySubnet'), variables('bastionSubnet'), variables('definedSubnets').subnets)]"
+  },
+  "resources": [
+    {
+      "comments": "Hub virtual network",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('vnetName')]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "routeIndex",
+        "nsgIndex"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": "[parameters('addressPrefix')]"
+        },
+        "subnets": "[variables('allSubnets')]"
+      }
+    },
+    {
+      "comments": "Route tables for all Subnets",
+      "type": "Microsoft.Network/routeTables",
+      "name": "[concat('route-', parameters('subnets')[copyIndex('routeIndex')].name)]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "routeIndex",
+        "count": "[length(parameters('subnets'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": true,
+        "routes": "[parameters('subnets')[copyIndex('routeIndex')].routes]"
+      }
+    },
+    {
+      "comments": "Route table for GatewaySubnet",
+      "type": "Microsoft.Network/routeTables",
+      "name": "[concat('route-GatewaySubnet-', parameters('locationInitials'))]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": "[parameters('routes-GatewaySubnet')]"
+      }
+    },
+    {
+      "comments": "Network Security Groups for all Subnets",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat('nsg-', parameters('subnets')[copyIndex('nsgIndex')].name)]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "nsgIndex",
+        "count": "[length(parameters('subnets'))]"
+      },
+      "properties": {
+        "securityRules": "[parameters('subnets')[copyIndex('nsgIndex')].securityRules]"
+      }
+    },
+    {
+      "comments": "Network Security Group for AzureBastionSubnet",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat('nsg-AzureBastionSubnet-', parameters('locationInitials'))]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": "[parameters('securityRules-AzureBastionSubnet')]"
+      }
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "value": "vnet-hcc-hub-uks-prod-01"
+    },
+    "addressPrefix": {
+      "value": [
+        "10.162.0.0/21"
+      ]
+    },
+    "gatewaySubnetAddressPrefix": {
+      "value": "10.162.0.0/26"
+    },
+    "locationInitials": {
+      "value": "uks"
+    },
+    "routes-GatewaySubnet": {
+      "value": [
+        {
+          "name": "Default-NVA",
+          "properties": {
+            "addressPrefix": "10.162.1.0/24",
+            "nextHopType": "VirtualAppliance",
+            "nextHopIpAddress": "10.243.192.196"
+          }
+        }
+      ]
+    },
+    "bastionSubnetAddressPrefix": {
+      "value": "10.162.0.64/27"
+    },
+    "securityRules-AzureBastionSubnet": {
+      "value": [
+        {
+            "name": "bastion-in-allow",
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "sourceAddressPrefix": "Internet",
+                "destinationPortRange": "443",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound"
+            }
+        },
+        {
+            "name": "bastion-control-in-allow",
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "sourceAddressPrefix": "GatewayManager",
+                "destinationPortRanges": [
+                    "443",
+                    "4443"
+                ],
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 120,
+                "direction": "Inbound"
+            }
+        },
+        {
+            "name": "bastion-in-deny",
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Deny",
+                "priority": 900,
+                "direction": "Inbound"
+            }
+        },
+        {
+            "name": "bastion-vnet-out-allow",
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationPortRanges": [
+                    "22",
+                    "3389"
+                ],
+                "destinationAddressPrefix": "VirtualNetwork",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Outbound"
+            }
+        },
+        {
+            "name": "bastion-azure-out-allow",
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationPortRange": "443",
+                "destinationAddressPrefix": "AzureCloud",
+                "access": "Allow",
+                "priority": 120,
+                "direction": "Outbound"
+            }
+        }
+    ]
+    },
+    "subnets": {
+      "value": [
+        {
+          "name": "snet-core-hcc-hub-uks-prod-01",
+          "addressPrefix": "10.162.0.96/27",
+          "securityRules": [],
+          "routes": [
+            {
+              "name": "Default-NVA",
+              "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.243.192.196"
+              }
+            },
+            {
+              "name": "Within-VNet",
+              "properties": {
+                "addressPrefix": "10.243.192.144/28",
+                "nextHopType": "VnetLocal"
+              }
+            }
+          ]
+        },
+        {
+          "name": "snet-mgmt-hcc-hub-uks-prod-01",
+          "addressPrefix": "10.162.1.0/24",
+          "securityRules": [],
+          "routes": []
+        },
+        {
+          "name": "snet-trust-hcc-hub-uks-prod-01",
+          "addressPrefix": "10.162.2.0/24",
+          "securityRules": [],
+          "routes": []
+        },
+        {
+          "name": "snet-untrust-hcc-hub-uks-prod-01",
+          "addressPrefix": "10.162.3.0/24",
+          "securityRules": [],
+          "routes": []
+        }
+      ]
+    }
+  }
+}
