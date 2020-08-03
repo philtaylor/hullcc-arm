@@ -195,6 +195,7 @@
         "subnettrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('trustSubnetName'))]",
         "subnetuntrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('untrustSubnetName'))]",
     },
+    "resources": [
         {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2016-06-01",
