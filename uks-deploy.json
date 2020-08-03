@@ -186,17 +186,6 @@
             "metadata": {
                 "description": "The subdirectory hosting the bootstrap files. Only required if hosting multiple bootstrap directories on the same share"
             }
-        },
-        "deploytestVM": {
-            "defaultValue": "no",
-            "allowedValues": [
-                "no",
-                "yes"
-            ],
-            "type": "String",
-            "metadata": {
-                "description": "Select yes to deploy a test VM on the internal network"
-            }
         }
     },
     "variables": {
@@ -328,24 +317,6 @@
                 "idleTimeoutInMinutes": 4,
                 "dnsSettings": {
                     "domainNameLabel": "[concat('fw2untrust', variables('uniqueId'))]"
-                }
-            },
-            "resources": []
-        },
-        {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2017-08-01",
-            "name": "IP-Dev-Management",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [],
-            "sku": {
-                "name": "Standard"
-            },
-            "properties": {
-                "publicIPAllocationMethod": "Static",
-                "idleTimeoutInMinutes": 4,
-                "dnsSettings": {
-                    "domainNameLabel": "[concat('devmanagement', variables('uniqueId'))]"
                 }
             },
             "resources": []
@@ -1277,63 +1248,6 @@
                 }
             },
             "condition": "[equals(parameters('bootstrapFirewall'),'no')]"
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2016-04-30-preview",
-            "name": "VM-Dev",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces/', 'INT-Dev-Management')]"
-            ],
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
-                },
-                "osProfile": {
-                    "computerName": "VM-Dev",
-                    "adminUsername": "[parameters('Username')]",
-                    "adminPassword": "[parameters('Password')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "UbuntuServer",
-                        "sku": "16.04.0-LTS",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "managedDisk": {
-                            "storageAccountType": "Premium_LRS"
-                        },
-                        "caching": "ReadWrite",
-                        "createOption": "FromImage"
-                    },
-                    "dataDisks": [
-                        {
-                            "diskSizeGB": "10",
-                            "lun": 0,
-                            "managedDisk": {
-                                "storageAccountType": "Premium_LRS"
-                            },
-                            "createOption": "Empty"
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-Dev-Management')]"
-                        }
-                    ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": "false"
-                    }
-                }
-            },
-            "condition": "[equals(parameters('deploytestVM'),'yes')]"
         }
     ],
     "outputs": {
