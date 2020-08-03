@@ -71,20 +71,6 @@
                 "description": "Resource Group VNETs are deployed"
             }
         },
-        "securityGroupResourceGroup": {
-            "defaultValue": "rg-vnet-hcc-hub-uks-prod",
-            "type": "String",
-            "metadata": {
-                "description": "Resource Group Securuty Groups are deployed"
-            }
-        },
-        "routeTableNetworkResourceGroup": {
-            "defaultValue": "rg-vnet-hcc-hub-uks-prod",
-            "type": "String",
-            "metadata": {
-                "description": "Resource Group route tables are deployed"
-            }
-        },
         "managementSubnetName": {
             "defaultValue": "snet-mgmt-hcc-hub-uks-prod-01",
             "type": "String",
@@ -810,7 +796,7 @@
                         }
                     }
                 ]
-            }
+            },
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
@@ -949,7 +935,8 @@
                         }
                     }
                 ]
-            }
+            },
+            "condition": "[equals(parameters('vnetNewOrExisting'),'new')]"
         },
         {
             "type": "Microsoft.Compute/availabilitySets",
