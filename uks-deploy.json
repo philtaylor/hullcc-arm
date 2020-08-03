@@ -68,7 +68,21 @@
             "defaultValue": "rg-vnet-hcc-hub-uks-prod",
             "type": "String",
             "metadata": {
-                "description": "Resource Group VNET is deployed in"
+                "description": "Resource Group VNETs are deployed"
+            }
+        },
+        "securityGroupResourceGroup": {
+            "defaultValue": "rg-vnet-hcc-hub-uks-prod",
+            "type": "String",
+            "metadata": {
+                "description": "Resource Group Securuty Groups are deployed"
+            }
+        },
+        "routeTableNetworkResourceGroup": {
+            "defaultValue": "rg-vnet-hcc-hub-uks-prod",
+            "type": "String",
+            "metadata": {
+                "description": "Resource Group route tables are deployed"
             }
         },
         "managementSubnetName": {
@@ -830,7 +844,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2017-06-01",
-            "name": "sq-fw-allow-all",
+            "name": "sg-fw-allow-all",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
