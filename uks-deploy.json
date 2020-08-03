@@ -51,108 +51,73 @@
             }
         },
         "virtualNetworkName": {
-            "defaultValue": "ACC-SHARED1-CORE-UKS-VNET01",
+            "defaultValue": "vnet-hcc-hub-uks-prod-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Virtual Network (VNET)"
             }
         },
         "virtualNetworkAddressPrefix": {
-            "defaultValue": "10.13.16.0/21",
+            "defaultValue": "10.162.0.0/21",
             "type": "String",
             "metadata": {
                 "description": "Virtual network address CIDR"
             }
         },
         "virtualNetworkResourceGroup": {
-            "defaultValue": "ACC-SHARED1-NETWORK-UKS-RG01",
+            "defaultValue": "rg-vnet-hcc-hub-uks-prod",
             "type": "String",
             "metadata": {
                 "description": "Resource Group VNET is deployed in"
             }
         },
         "managementSubnetName": {
-            "defaultValue": "UKS-FIREWALL-MGMT-10.13.18.0-24",
+            "defaultValue": "snet-mgmt-hcc-hub-uks-prod-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Management Subnet"
             }
         },
         "managementSubnetAddressPrefix": {
-            "defaultValue": "10.13.18.0/24",
+            "defaultValue": "10.162.1.0/24",
             "type": "String",
             "metadata": {
                 "description": "Management Subnet address CIDR"
             }
         },
         "untrustSubnetName": {
-            "defaultValue": "UKS-FIREWALL-EXTERNAL-10.13.20.0-24",
+            "defaultValue": "snet-untrust-hcc-hub-uks-prod-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Untrust Subnet"
             }
         },
         "untrustSubnetAddressPrefix": {
-            "defaultValue": "10.13.20.0/24",
+            "defaultValue": "10.162.3.0/24",
             "type": "String",
             "metadata": {
                 "description": "Untrust Subnet address CIDR"
             }
         },
         "trustSubnetName": {
-            "defaultValue": "UKS-FIREWALL-INTERNAL-10.13.17.0-24",
+            "defaultValue": "snet-trust-hcc-hub-uks-prod-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Trust Subnet"
             }
         },
         "trustSubnetAddressPrefix": {
-            "defaultValue": "10.13.17.0/24",
+            "defaultValue": "10.162.2.0/24",
             "type": "String",
             "metadata": {
                 "description": "Trust Subnet address CIDR"
             }
         },
-        "dmzSubnetName": {
-            "defaultValue": "UKS-FIREWALL-DMZ-10.13.19.0-24",
-            "type": "String",
-            "metadata": {
-                "description": "Name of the DMZ Subnet"
-            }
-        },
-        "dmzSubnetAddressPrefix": {
-            "defaultValue": "10.13.19.0/24",
-            "type": "String",
-            "metadata": {
-                "description": "DMZ Subnet address CIDR"
-            }
-        },
-        "protectedSubnetName": {
-            "defaultValue": "Dev",
-            "type": "String",
-            "metadata": {
-                "description": "Name of the protected backend Subnet (Web, Dev, DB)"
-            }
-        },
-        "protectedSubnetAddressPrefix": {
-            "defaultValue": "10.0.4.0/24",
-            "type": "String",
-            "metadata": {
-                "description": "Protected Subnet address CIDR"
-            }
-        },
         "egressLBFrontEndAddress": {
-            "defaultValue": "10.13.17.100",
+            "defaultValue": "10.162.2.100",
             "type": "String",
             "metadata": {
                 "description": "IP Address of the inbound load balancer in the Trust network"
-            }
-        },
-        "egressLBDMZFrontEndAddress": {
-            "defaultValue": "10.13.19.100",
-            "type": "String",
-            "metadata": {
-                "description": "IP Address of the inbound load balancer in the DMZ network"
             }
         },
         "Username": {
@@ -224,67 +189,20 @@
         "vnetID": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "uniqueId": "[uniqueString(resourceGroup().id)]",
         "customDataField": "[concat('storage-account=', parameters('BootstrapStorageAccount'), ',access-key=', parameters('StorageAccountAccessKey'), ',file-share=', parameters('StorageAccountFileShare'),',share-directory=', parameters('StorageAccountFileShareDirectory'))]",
-        "rtProtectedSubnetName": "[concat('RT-',parameters('protectedSubnetName'))]",
         "space": " ",
         "lbId": "[resourceId('Microsoft.Network/loadBalancers/', 'LB-External')]",
-        "subnetprotRef": "[concat(variables('vnetID'),'/subnets/', parameters('protectedSubnetName'))]",
         "subnetmgmtRef": "[concat(variables('vnetID'),'/subnets/', parameters('managementSubnetName'))]",
         "subnettrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('trustSubnetName'))]",
         "subnetuntrustRef": "[concat(variables('vnetID'),'/subnets/', parameters('untrustSubnetName'))]",
-        "subnetdmzRef": "[concat(variables('vnetID'),'/subnets/', parameters('dmzSubnetName'))]"
     },
-    "resources": [
-        {
-            "type": "Microsoft.Network/routeTables",
-            "apiVersion": "2016-03-30",
-            "name": "[variables('rtProtectedSubnetName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [],
-            "properties": {
-                "routes": [
-                    {
-                        "name": "[concat(parameters('protectedSubnetName'),'-Network')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
-                            "nextHopType": "VirtualAppliance",
-                            "nextHopIpAddress": "[parameters('egressLBFrontEndAddress')]"
-                        }
-                    },
-                    {
-                        "name": "[concat(parameters('protectedSubnetName'),'-Local')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('protectedSubnetAddressPrefix')]",
-                            "nextHopType": "VnetLocal"
-                        }
-                    },
-                    {
-                        "name": "[concat(parameters('protectedSubnetName'),'-Default')]",
-                        "properties": {
-                            "addressPrefix": "0.0.0.0/0",
-                            "nextHopType": "VirtualAppliance",
-                            "nextHopIpAddress": "[parameters('egressLBFrontEndAddress')]"
-                        }
-                    },
-                    {
-                        "name": "[concat(parameters('protectedSubnetName'),'-Trust')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('trustSubnetAddressPrefix')]",
-                            "nextHopType": "VnetLocal"
-                        }
-                    }
-                ]
-            },
-            "resources": []
-        },
         {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2016-06-01",
             "name": "[parameters('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/routeTables', variables('rtProtectedSubnetName'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', 'Allow-All')]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', 'Management')]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'sg-fw-allow-all')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', 'sg-fw-mgmt')]"
             ],
             "properties": {
                 "addressSpace": {
@@ -299,7 +217,7 @@
                         "properties": {
                             "addressPrefix": "[parameters('managementSubnetAddressPrefix')]",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Management')]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'sg-fw-mgmt')]"
                             }
                         }
                     },
@@ -309,7 +227,7 @@
                         "properties": {
                             "addressPrefix": "[parameters('untrustSubnetAddressPrefix')]",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Allow-All')]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'sg-fw-allow-all')]"
                             }
                         }
                     },
@@ -319,51 +237,13 @@
                         "properties": {
                             "addressPrefix": "[parameters('trustSubnetAddressPrefix')]",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Allow-All')]"
-                            }
-                        }
-                    },
-                    {
-                        "id": "[variables('subnetdmzRef')]",
-                        "name": "[parameters('dmzSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('dmzSubnetAddressPrefix')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Allow-All')]"
-                            }
-                        }
-                    },
-                    {
-                        "name": "[parameters('protectedSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('protectedSubnetAddressPrefix')]",
-                            "routeTable": {
-                                "id": "[resourceId('Microsoft.Network/routeTables', variables('rtProtectedSubnetName'))]"
-                            },
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Management')]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'sg-fw-allow-all')]"
                             }
                         }
                     }
                 ]
             },
             "condition": "[equals(parameters('vnetNewOrExisting'),'new')]"
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "2016-06-01",
-            "name": "[concat(parameters('virtualNetworkName'), '/', parameters('protectedSubnetName'))]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressPrefix": "[parameters('protectedSubnetAddressPrefix')]",
-                "routeTable": {
-                    "id": "[resourceId('Microsoft.Network/routeTables', variables('rtProtectedSubnetName'))]"
-                },
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'Management')]"
-                }
-            },
-            "condition": "[equals(parameters('vnetNewOrExisting'),'existing')]"
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
@@ -562,24 +442,11 @@
                             "subnet": {
                                 "id": "[variables('subnettrustRef')]"                            }
                         }
-                    },
-                    {
-                        "name": "LB-DMZ-FrontEnd",
-                        "properties": {
-                            "privateIPAddress": "[parameters('egressLBDMZFrontEndAddress')]",
-                            "privateIPAllocationMethod": "Static",
-                            "subnet": {
-                                "id": "[variables('subnetdmzRef')]"
-                            }
-                        }
                     }
                 ],
                 "backendAddressPools": [
                     {
                         "name": "AS-FW"
-                    },
-                    {
-                        "name": "DMZ-AS-FW"
                     }
                 ],
                 "loadBalancingRules": [
@@ -597,26 +464,6 @@
                             "loadDistribution": "Default",
                             "backendAddressPool": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/backendAddressPools/AS-FW')]"
-                            },
-                            "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/probes/TCP-22')]"
-                            }
-                        }
-                    },
-                    {
-                        "name": "Allow-DMZ",
-                        "properties": {
-                            "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/frontendIPConfigurations/LB-DMZ-FrontEnd')]"
-                            },
-                            "frontendPort": 0,
-                            "backendPort": 0,
-                            "enableFloatingIP": true,
-                            "idleTimeoutInMinutes": 4,
-                            "protocol": "All",
-                            "loadDistribution": "Default",
-                            "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/backendAddressPools/DMZ-AS-FW')]"
                             },
                             "probe": {
                                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/probes/TCP-22')]"
@@ -826,94 +673,9 @@
             }
         },
         {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2015-06-15",
-            "name": "INT-FW1-DMZ",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-                "[resourceId('Microsoft.Network/loadBalancers', 'LB-Internal')]"
-            ],
-            "properties": {
-                "enableIPForwarding": true,
-                "ipConfigurations": [
-                    {
-                        "name": "FW1-DMZ",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[variables('subnetdmzRef')]"
-                            },
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/backendAddressPools/DMZ-AS-FW')]"
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2015-06-15",
-            "name": "INT-FW2-DMZ",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-                "[resourceId('Microsoft.Network/loadBalancers', 'LB-Internal')]"
-            ],
-            "properties": {
-                "enableIPForwarding": true,
-                "ipConfigurations": [
-                    {
-                        "name": "FW2-DMZ",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[variables('subnetdmzRef')]"
-                            },
-                            "loadBalancerBackendAddressPools": [
-                                {
-                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'LB-Internal'), '/backendAddressPools/DMZ-AS-FW')]"
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2015-06-15",
-            "name": "INT-Dev-Management",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', 'IP-Dev-Management')]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-            ],
-            "properties": {
-                "enableIPForwarding": false,
-                "ipConfigurations": [
-                    {
-                        "name": "Dev",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'IP-Dev-Management')]"
-                            },
-                            "subnet": {
-                                "id": "[variables('subnetprotRef')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2017-06-01",
-            "name": "Management",
+            "name": "sg-fw-mgmt",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -1067,7 +829,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2017-06-01",
-            "name": "Allow-All",
+            "name": "sq-fw-allow-all",
             "location": "[resourceGroup().location]",
             "dependsOn": [],
             "properties": {
@@ -1230,7 +992,6 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Management')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Untrust')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Trust')]",
-                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-DMZ')]",
                 "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
             ],
             "plan": {
@@ -1282,12 +1043,6 @@
                         },
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Trust')]",
-                            "properties": {
-                                "primary": false
-                            }
-                        },
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-DMZ')]",
                             "properties": {
                                 "primary": false
                             }
@@ -1308,7 +1063,6 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Management')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Untrust')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Trust')]",
-                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-DMZ')]",
                 "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
             ],
             "plan": {
@@ -1363,12 +1117,6 @@
                             "properties": {
                                 "primary": false
                             }
-                        },
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-DMZ')]",
-                            "properties": {
-                                "primary": false
-                            }
                         }
                     ]
                 }
@@ -1386,7 +1134,6 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Management')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Untrust')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Trust')]",
-                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-DMZ')]",
                 "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
             ],
             "plan": {
@@ -1440,12 +1187,6 @@
                             "properties": {
                                 "primary": false
                             }
-                        },
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-DMZ')]",
-                            "properties": {
-                                "primary": false
-                            }
                         }
                     ]
                 }
@@ -1463,7 +1204,6 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Management')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Untrust')]",
                 "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Trust')]",
-                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-DMZ')]",
                 "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
             ],
             "plan": {
@@ -1514,12 +1254,6 @@
                         },
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Trust')]",
-                            "properties": {
-                                "primary": false
-                            }
-                        },
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-DMZ')]",
                             "properties": {
                                 "primary": false
                             }
