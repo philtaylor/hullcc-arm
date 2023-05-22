@@ -15,7 +15,7 @@
             }
         },
         "imageVersion": {
-            "defaultValue": "9.1.0",
+            "defaultValue": "10.1.0",
             "allowedValues": [
                 "9.1.10",
                 "10.0.6",
@@ -1096,6 +1096,156 @@
                 }
             },
             "condition": "[equals(parameters('bootstrapFirewall'),'yes')]"
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "name": "VM-FW01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'IP-FW1-Management')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Management')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Untrust')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Trust')]",
+                "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
+            ],
+            "plan": {
+                "name": "[parameters('imageSku')]",
+                "product": "vmseries1",
+                "publisher": "paloaltonetworks"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "VM-FW1",
+                    "adminUsername": "[parameters('Username')]",
+                    "adminPassword": "[parameters('Password')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "paloaltonetworks",
+                        "offer": "vmseries1",
+                        "sku": "[parameters('imageSku')]",
+                        "version": "[parameters('imageVersion')]"
+                    },
+                    "osDisk": {
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Management')]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Untrust')]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW1-Trust')]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            },
+            "condition": "[equals(parameters('bootstrapFirewall'),'no')]"
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "name": "VM-FW02",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'IP-FW2-Management')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Management')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Untrust')]",
+                "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Trust')]",
+                "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
+            ],
+            "plan": {
+                "name": "[parameters('imageSku')]",
+                "product": "vmseries1",
+                "publisher": "paloaltonetworks"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', 'AS-FW')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "VM-FW2",
+                    "adminUsername": "[parameters('Username')]",
+                    "adminPassword": "[parameters('Password')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "paloaltonetworks",
+                        "offer": "vmseries1",
+                        "sku": "[parameters('imageSku')]",
+                        "version": "[parameters('imageVersion')]"
+                    },
+                    "osDisk": {
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Management')]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Untrust')]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'INT-FW2-Trust')]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                }
+            },
+            "condition": "[equals(parameters('bootstrapFirewall'),'no')]"
         }
-    },
+    ],
+    "outputs": {
+        "firewall 1 management": {
+            "type": "String",
+            "value": "[reference('IP-FW1-Management').dnsSettings.fqdn]"
+        },
+        "firewall 2 management": {
+            "type": "String",
+            "value": "[reference('IP-FW2-Management').dnsSettings.fqdn]"
+        }
+    }
 }
