@@ -86,7 +86,7 @@
             }
         },
         "untrustSubnetName": {
-            "defaultValue": "snet-untrust-hcc-hub-uks-prod-01",
+            "defaultValue": "snet-untrust-ghd-hub-uks-prod-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Untrust Subnet"
