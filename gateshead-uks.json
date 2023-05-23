@@ -15,7 +15,7 @@
             }
         },
         "imageVersion": {
-            "defaultValue": "latest",
+            "defaultValue": "9.1.0",
             "allowedValues": [
                 "9.1.10",
                 "10.0.6",
@@ -51,70 +51,70 @@
             }
         },
         "virtualNetworkName": {
-            "defaultValue": "vnet-ghd-hub-uks-prod-01",
+            "defaultValue": "vnet-connectivity-prod-uksouth-01",
             "type": "String",
             "metadata": {
                 "description": "Name of the Virtual Network (VNET)"
             }
         },
         "virtualNetworkAddressPrefix": {
-            "defaultValue": "10.200.0.0/21",
+            "defaultValue": "10.170.0.0/21",
             "type": "String",
             "metadata": {
                 "description": "Virtual network address CIDR"
             }
         },
         "virtualNetworkResourceGroup": {
-            "defaultValue": "rg-vnet-ghd-hub-uks-prod",
+            "defaultValue": "rg-connectivity-network-prod-uksouth-01",
             "type": "String",
             "metadata": {
                 "description": "Resource Group VNETs are deployed"
             }
         },
         "managementSubnetName": {
-            "defaultValue": "snet-mgmt-ghd-hub-uks-prod-01",
+            "defaultValue": "sn-palo-mgmt",
             "type": "String",
             "metadata": {
                 "description": "Name of the Management Subnet"
             }
         },
         "managementSubnetAddressPrefix": {
-            "defaultValue": "10.200.1.0/24",
+            "defaultValue": "10.170.1.0/24",
             "type": "String",
             "metadata": {
                 "description": "Management Subnet address CIDR"
             }
         },
         "untrustSubnetName": {
-            "defaultValue": "snet-untrust-ghd-hub-uks-prod-01",
+            "defaultValue": "sn-palo-untrusted",
             "type": "String",
             "metadata": {
                 "description": "Name of the Untrust Subnet"
             }
         },
         "untrustSubnetAddressPrefix": {
-            "defaultValue": "10.200.3.0/24",
+            "defaultValue": "10.170.3.0/24",
             "type": "String",
             "metadata": {
                 "description": "Untrust Subnet address CIDR"
             }
         },
         "trustSubnetName": {
-            "defaultValue": "snet-trust-ghd-hub-uks-prod-01",
+            "defaultValue": "sn-palo-trusted",
             "type": "String",
             "metadata": {
                 "description": "Name of the Trust Subnet"
             }
         },
         "trustSubnetAddressPrefix": {
-            "defaultValue": "10.200.2.0/24",
+            "defaultValue": "10.170.2.0/24",
             "type": "String",
             "metadata": {
                 "description": "Trust Subnet address CIDR"
             }
         },
         "egressLBFrontEndAddress": {
-            "defaultValue": "10.200.2.100",
+            "defaultValue": "10.170.2.100",
             "type": "String",
             "metadata": {
                 "description": "IP Address of the inbound load balancer in the Trust network"
